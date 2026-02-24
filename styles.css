@@ -5,11 +5,19 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: #f5f5f5;
     color: #333;
     line-height: 1.6;
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100vh;
 }
 
 .hidden {
@@ -28,6 +36,8 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    overflow-y: auto;
+    padding: 20px 0;
 }
 
 .modal-content {
@@ -36,7 +46,10 @@ body {
     border-radius: 8px;
     max-width: 600px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    margin: auto;
 }
 
 .modal-content h1 {
@@ -61,6 +74,8 @@ body {
     padding: 20px;
     border-radius: 6px;
     margin: 20px 0;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .ticket-builder h3 {
@@ -541,6 +556,35 @@ header h1 {
     border-top: 1px solid #eee;
 }
 
+/* Reset Section (Separated) */
+.reset-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #eee;
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 15px 30px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.reset-btn:hover {
+    background: #c0392b;
+    transform: scale(1.02);
+}
+
+.reset-btn:active {
+    transform: scale(0.98);
+}
+
 /* Winners Display */
 .winners-display {
     margin: 20px 0;
@@ -698,6 +742,13 @@ header h1 {
     .modal-content {
         padding: 20px;
         max-width: 95%;
+        max-height: 95vh;
+        width: 95%;
+    }
+
+    .modal {
+        align-items: flex-start;
+        padding: 10px 0;
     }
 
     .setup-actions {
@@ -734,6 +785,106 @@ header h1 {
 
     .letter-btn {
         flex: 1 1 30%;
+    }
+
+    /* Mobile-friendly adjustments */
+    header h1 {
+        font-size: 22px;
+    }
+
+    .control-panel, .history-panel {
+        padding: 20px;
+    }
+
+    .draw-btn {
+        font-size: 20px;
+        padding: 18px;
+    }
+
+    /* Make buttons more touch-friendly */
+    .color-btn, .letter-btn {
+        padding: 18px;
+        font-size: 20px;
+    }
+
+    .preset-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .num-preset {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+
+    .number-control input {
+        width: 100px;
+        font-size: 18px;
+    }
+
+    /* Better spacing on mobile */
+    .selector-group {
+        margin-bottom: 25px;
+    }
+
+    .builder-buttons {
+        flex-direction: column;
+    }
+
+    .add-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+    }
+}
+
+/* Extra small devices (phones in portrait mode) */
+@media (max-width: 480px) {
+    .pool-count {
+        font-size: 32px;
+    }
+
+    .modal-content {
+        padding: 15px;
+        max-height: 96vh;
+        width: 98%;
+    }
+
+    .modal-content h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .color-btn {
+        flex: 1 1 48%;
+        padding: 20px;
+        font-size: 22px;
+    }
+
+    .letter-btn {
+        flex: 1 1 48%;
+        padding: 16px;
+        font-size: 20px;
+    }
+
+    .number-input {
+        padding: 14px;
+        font-size: 16px;
+    }
+
+    .selector-group label {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .ticket-builder h3, .manual-entry h3 {
+        font-size: 15px;
     }
 }
 
