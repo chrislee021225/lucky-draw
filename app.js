@@ -4,8 +4,11 @@ let state = {
     availableTickets: [],
     drawHistory: [],
     totalTickets: 0,
-    selectedColor: null,
-    selectedLetter: null
+    selectedColor: 'Purple',  // Default to Purple
+    selectedLetter: 'D',      // Default to D
+    showFullFormat: true,     // Show Color-Letter-Number
+    enableAnimation: true,    // Enable draw animation
+    iconMode: false           // Text mode by default
 };
 
 // DOM Elements
@@ -82,6 +85,18 @@ function init() {
     clearTicketsBtn.addEventListener('click', clearTickets);
     ticketInput.addEventListener('input', updateTicketCount);
 
+    // Quick Launch Button
+    const quickLaunchBtn = document.getElementById('quickLaunchBtn');
+    quickLaunchBtn.addEventListener('click', quickLaunch);
+
+    // Advanced Settings Toggle
+    const advancedToggleBtn = document.getElementById('advancedToggleBtn');
+    const advancedSettings = document.getElementById('advancedSettings');
+    advancedToggleBtn.addEventListener('click', () => {
+        advancedSettings.classList.toggle('hidden');
+        advancedToggleBtn.classList.toggle('active');
+    });
+
     // Event Listeners - Main App
     drawBtn.addEventListener('click', performDraw);
     undoBtn.addEventListener('click', undoLastDraw);
@@ -101,10 +116,11 @@ function init() {
         }
     });
 
-    // Preset buttons (only fill prize name)
+    // Preset buttons (fill both prize name and number)
     document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             prizeName.value = btn.dataset.prize;
+            numWinners.value = btn.dataset.winners;
         });
     });
 
@@ -114,6 +130,44 @@ function init() {
             numWinners.value = btn.dataset.num;
         });
     });
+
+    // Display Options Event Listeners
+    const showFullFormatToggle = document.getElementById('showFullFormat');
+    const enableAnimationToggle = document.getElementById('enableAnimation');
+    const iconModeToggle = document.getElementById('iconMode');
+
+    if (showFullFormatToggle) {
+        showFullFormatToggle.addEventListener('change', (e) => {
+            state.showFullFormat = e.target.checked;
+            saveState();
+            // Re-render winners if displayed
+            if (!winnersDisplay.classList.contains('hidden')) {
+                updateDisplayFormat();
+            }
+            // Re-render history to apply format change
+            updateHistory();
+        });
+    }
+
+    if (enableAnimationToggle) {
+        enableAnimationToggle.addEventListener('change', (e) => {
+            state.enableAnimation = e.target.checked;
+            saveState();
+        });
+    }
+
+    if (iconModeToggle) {
+        iconModeToggle.addEventListener('change', (e) => {
+            state.iconMode = e.target.checked;
+            saveState();
+            // Toggle icon mode class on body
+            if (state.iconMode) {
+                document.body.classList.add('icon-mode');
+            } else {
+                document.body.classList.remove('icon-mode');
+            }
+        });
+    }
 
     // Prevent accidental page close
     window.addEventListener('beforeunload', (e) => {
@@ -158,7 +212,7 @@ function addRangeTickets() {
 
     const currentTickets = ticketInput.value.trim();
     if (currentTickets) {
-        ticketInput.value = currentTickets + '\n' + tickets.join('\n');
+        ticketInput.value = tickets.join('\n') + '\n' + currentTickets;
     } else {
         ticketInput.value = tickets.join('\n');
     }
@@ -188,7 +242,7 @@ function add100Tickets() {
 
     const currentTickets = ticketInput.value.trim();
     if (currentTickets) {
-        ticketInput.value = currentTickets + '\n' + tickets.join('\n');
+        ticketInput.value = tickets.join('\n') + '\n' + currentTickets;
     } else {
         ticketInput.value = tickets.join('\n');
     }
@@ -220,7 +274,7 @@ function updateTicketCount() {
 
 // Generate Sample Tickets
 function generateSampleTickets() {
-    const colors = ['Blue', 'Red', 'Green', 'Orange'];
+    const colors = ['Blue', 'Red', 'Green', 'Purple'];
     const letters = ['A', 'B', 'C', 'D', 'E'];
     const tickets = [];
 
@@ -233,6 +287,24 @@ function generateSampleTickets() {
 
     ticketInput.value = tickets.join('\n');
     updateTicketCount();
+}
+
+// Quick Launch - Add Purple-D 1-100 and start immediately
+function quickLaunch() {
+    // Generate Purple-D-1 through Purple-D-100
+    const tickets = [];
+    for (let i = 1; i <= 100; i++) {
+        tickets.push(`Purple-D-${i}`);
+    }
+
+    // Set the tickets
+    ticketInput.value = tickets.join('\n');
+    updateTicketCount();
+
+    // Automatically proceed to drawing stage
+    setTimeout(() => {
+        startDrawing();
+    }, 300); // Small delay for visual feedback
 }
 
 // Start Drawing (Setup Complete)
@@ -250,7 +322,7 @@ function startDrawing() {
         .filter(t => t.length > 0);
 
     // Validate format
-    const ticketRegex = /^(Blue|Red|Green|Orange)-([A-E])-(\d+)$/i;
+    const ticketRegex = /^(Blue|Red|Green|Purple)-([A-E])-(\d+)$/i;
     const invalidTickets = tickets.filter(t => !ticketRegex.test(t));
 
     if (invalidTickets.length > 0) {
@@ -324,9 +396,21 @@ function performDraw() {
     // Save state
     saveState();
 
-    // Update UI
+    // Update UI - Display winners first
     displayWinners(winners);
-    updateUI();
+
+    // Update history based on animation setting
+    if (state.enableAnimation) {
+        // Calculate total animation time
+        const animationDuration = (winners.length * 400) + 750 + 500; // delays + shuffle + reveal
+        // Update history after animation completes
+        setTimeout(() => {
+            updateUI();
+        }, animationDuration);
+    } else {
+        // Update immediately if no animation
+        updateUI();
+    }
 
     // Don't clear inputs - keep them for repeated draws
 }
@@ -342,15 +426,105 @@ function displayWinners(winners) {
     winnersDisplay.classList.remove('hidden');
     winnersList.innerHTML = '';
 
-    winners.forEach(ticket => {
-        const div = document.createElement('div');
-        div.className = 'winner-ticket';
-        div.textContent = ticket;
-        winnersList.appendChild(div);
-    });
+    if (state.enableAnimation) {
+        // Fancy animated reveal
+        displayWinnersAnimated(winners);
+    } else {
+        // Instant display (no animation)
+        displayWinnersInstant(winners);
+    }
 
     // Scroll to winners
     winnersDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Instant display (no animation)
+function displayWinnersInstant(winners) {
+    winners.forEach(ticket => {
+        const div = createWinnerElement(ticket);
+        div.textContent = formatTicket(ticket);
+        winnersList.appendChild(div);
+    });
+}
+
+// Animated display with shuffling effect
+function displayWinnersAnimated(winners) {
+    const allTickets = [...state.availableTickets, ...winners];
+
+    winners.forEach((ticket, index) => {
+        const div = createWinnerElement(ticket);
+        div.style.opacity = '0';
+        winnersList.appendChild(div);
+
+        // Delay each winner's animation
+        setTimeout(() => {
+            animateWinnerReveal(div, ticket, allTickets);
+        }, index * 400); // 400ms delay between each
+    });
+}
+
+// Create winner element
+function createWinnerElement(ticket) {
+    const div = document.createElement('div');
+    div.className = 'winner-ticket';
+    div.dataset.fullTicket = ticket;
+
+    if (!state.showFullFormat) {
+        div.classList.add('number-only');
+    }
+
+    return div;
+}
+
+// Animate single winner with shuffling effect
+function animateWinnerReveal(element, finalTicket, ticketPool) {
+    element.style.opacity = '1';
+    element.classList.add('shuffling');
+
+    let shuffleCount = 0;
+    const maxShuffles = 15;
+    const shuffleSpeed = 50; // ms between shuffles
+
+    const shuffleInterval = setInterval(() => {
+        // Show random ticket during shuffle
+        const randomTicket = ticketPool[Math.floor(Math.random() * ticketPool.length)];
+        element.textContent = formatTicket(randomTicket);
+        shuffleCount++;
+
+        if (shuffleCount >= maxShuffles) {
+            clearInterval(shuffleInterval);
+            // Final reveal
+            element.classList.remove('shuffling');
+            element.classList.add('revealed');
+            element.textContent = formatTicket(finalTicket);
+        }
+    }, shuffleSpeed);
+}
+
+// Format ticket based on display settings
+function formatTicket(ticket) {
+    if (!state.showFullFormat) {
+        // Extract just the number (e.g., "Purple-D-23" -> "23")
+        const parts = ticket.split('-');
+        return parts[parts.length - 1]; // Return the last part (number)
+    }
+    return ticket; // Return full format
+}
+
+// Update display format for currently shown winners
+function updateDisplayFormat() {
+    const winnerTickets = winnersList.querySelectorAll('.winner-ticket');
+    winnerTickets.forEach(div => {
+        const fullTicket = div.dataset.fullTicket;
+        div.textContent = formatTicket(fullTicket);
+
+        // Toggle number-only class
+        if (!state.showFullFormat) {
+            div.classList.add('number-only');
+        } else {
+            div.classList.remove('number-only');
+        }
+    });
 }
 
 // Undo Last Draw
@@ -378,14 +552,43 @@ function undoLastDraw() {
 
 // Update UI
 function updateUI() {
-    // Update pool count
-    poolCount.textContent = state.availableTickets.length;
+    // Update pool count with animation effect
+    updatePoolCount();
 
     // Update undo button
     undoBtn.disabled = state.drawHistory.length === 0;
 
     // Update history
     updateHistory();
+}
+
+// Update pool count with counting animation
+function updatePoolCount() {
+    const targetCount = state.availableTickets.length;
+    const currentCount = parseInt(poolCount.textContent) || 0;
+
+    if (state.enableAnimation && Math.abs(targetCount - currentCount) > 0) {
+        // Animate the number counting down
+        const duration = 500; // 500ms animation
+        const steps = Math.min(Math.abs(targetCount - currentCount), 20); // Max 20 steps
+        const stepDuration = duration / steps;
+        const increment = (targetCount - currentCount) / steps;
+
+        let step = 0;
+        const countInterval = setInterval(() => {
+            step++;
+            const newValue = Math.round(currentCount + (increment * step));
+            poolCount.textContent = newValue;
+
+            if (step >= steps) {
+                clearInterval(countInterval);
+                poolCount.textContent = targetCount; // Ensure final value is exact
+            }
+        }, stepDuration);
+    } else {
+        // Instant update
+        poolCount.textContent = targetCount;
+    }
 }
 
 // Update History Display
@@ -409,14 +612,16 @@ function updateHistory() {
             second: '2-digit'
         });
 
+        const numberOnlyClass = !state.showFullFormat ? ' number-only' : '';
+
         item.innerHTML = `
-            <div class="history-header">
+            <div class="history-item-header">
                 <span class="prize-name">${escapeHtml(draw.prizeName)}</span>
                 <span class="draw-info">${draw.numDrawn} winner${draw.numDrawn > 1 ? 's' : ''}</span>
             </div>
             <div class="timestamp">${timeStr} | Remaining: ${draw.remainingPoolSize}</div>
             <div class="history-winners">
-                ${draw.winners.map(w => `<span class="history-ticket">${escapeHtml(w)}</span>`).join('')}
+                ${draw.winners.map(w => `<span class="history-ticket${numberOnlyClass}">${escapeHtml(formatTicket(w))}</span>`).join('')}
             </div>
         `;
 
@@ -484,7 +689,22 @@ function loadState() {
     try {
         const saved = localStorage.getItem('luckyDrawState');
         if (saved) {
-            state = JSON.parse(saved);
+            const loadedState = JSON.parse(saved);
+            state = { ...state, ...loadedState }; // Merge with defaults
+
+            // Restore toggle states in UI
+            const showFullFormatToggle = document.getElementById('showFullFormat');
+            const enableAnimationToggle = document.getElementById('enableAnimation');
+            const iconModeToggle = document.getElementById('iconMode');
+
+            if (showFullFormatToggle) showFullFormatToggle.checked = state.showFullFormat !== false;
+            if (enableAnimationToggle) enableAnimationToggle.checked = state.enableAnimation !== false;
+            if (iconModeToggle) iconModeToggle.checked = state.iconMode === true;
+
+            // Apply icon mode class to body if enabled
+            if (state.iconMode) {
+                document.body.classList.add('icon-mode');
+            }
         }
     } catch (e) {
         console.error('Failed to load state:', e);

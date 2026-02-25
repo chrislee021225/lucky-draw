@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Draw System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Setup Modal -->
+    <div id="setupModal" class="modal">
+        <div class="modal-content">
+            <h1>Lucky Draw Setup</h1>
+
+            <!-- Ticket Builder with Buttons -->
+            <div class="ticket-builder">
+                <h3>Add Tickets</h3>
+
+                <!-- Color Buttons -->
+                <div class="selector-group">
+                    <label>Color</label>
+                    <div class="color-buttons">
+                        <button class="color-btn blue-btn" data-color="Blue">Blue</button>
+                        <button class="color-btn red-btn" data-color="Red">Red</button>
+                        <button class="color-btn green-btn" data-color="Green">Green</button>
+                        <button class="color-btn orange-btn active" data-color="Purple">Purple</button>
+                    </div>
+                </div>
+
+                <!-- Letter Buttons -->
+                <div class="selector-group">
+                    <label>Letter</label>
+                    <div class="letter-buttons">
+                        <button class="letter-btn" data-letter="A">A</button>
+                        <button class="letter-btn" data-letter="B">B</button>
+                        <button class="letter-btn" data-letter="C">C</button>
+                        <button class="letter-btn active" data-letter="D">D</button>
+                        <button class="letter-btn" data-letter="E">E</button>
+                    </div>
+                </div>
+
+                <!-- Number Range -->
+                <div class="selector-group">
+                    <label>Number Range</label>
+                    <div class="number-range">
+                        <input type="number" id="numberFrom" class="number-input" placeholder="From" min="1" max="100">
+                        <span class="range-separator">-</span>
+                        <input type="number" id="numberTo" class="number-input" placeholder="To" min="1" max="100">
+                    </div>
+                </div>
+
+                <div class="builder-buttons">
+                    <button id="addRangeBtn" class="add-btn">Add Range to List</button>
+                    <button id="add100Btn" class="add-btn secondary">Add 1-100</button>
+                </div>
+            </div>
+
+            <!-- Manual Entry Section -->
+            <div class="manual-entry">
+                <h3>Ticket List <span class="ticket-count">(0 tickets)</span></h3>
+                <textarea id="ticketInput" placeholder="Blue-A-1&#10;Blue-A-2&#10;Red-B-3&#10;..." rows="8"></textarea>
+            </div>
+
+            <div class="setup-actions">
+                <button id="generateSampleBtn" class="secondary-btn">Generate Sample 100</button>
+                <button id="clearTicketsBtn" class="secondary-btn">Clear All</button>
+                <button id="startDrawBtn" class="primary-btn">Start Drawing</button>
+            </div>
+
+            <div id="setupError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <header>
+            <h1>Lucky Draw System</h1>
+            <div class="pool-status">
+                <span class="pool-label">Tickets Remaining:</span>
+                <span id="poolCount" class="pool-count">100</span>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <h2>Draw Controls</h2>
+
+                <!-- Quick Presets -->
+                <div class="quick-presets">
+                    <button class="preset-btn" data-prize="3rd Prize" data-winners="2">3rd Prize</button>
+                    <button class="preset-btn" data-prize="2nd Prize" data-winners="2">2nd Prize</button>
+                    <button class="preset-btn" data-prize="1st Prize" data-winners="3">1st Prize</button>
+                    <button class="preset-btn" data-prize="Noodle" data-winners="30">Noodle</button>
+                    <button class="preset-btn" data-prize="Gift Cards" data-winners="30">Gift Cards</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group compact">
+                        <label for="prizeName">Prize Name:</label>
+                        <input type="text" id="prizeName" placeholder="e.g., Prize A">
+                    </div>
+
+                    <div class="form-group compact">
+                        <label for="numWinners">Winners:</label>
+                        <div class="input-with-presets">
+                            <div class="number-control">
+                                <button class="control-btn minus-btn" id="decreaseWinners">-</button>
+                                <input type="number" id="numWinners" min="1" value="" placeholder="0">
+                                <button class="control-btn plus-btn" id="increaseWinners">+</button>
+                            </div>
+                            <div class="number-presets">
+                                <button class="num-preset" data-num="1">1</button>
+                                <button class="num-preset" data-num="2">2</button>
+                                <button class="num-preset" data-num="3">3</button>
+                                <button class="num-preset" data-num="24">24</button>
+                                <button class="num-preset" data-num="30">30</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="drawBtn" class="draw-btn">DRAW</button>
+
+                <div id="drawError" class="error-message"></div>
+
+                <!-- Recent Winners Display -->
+                <div id="winnersDisplay" class="winners-display hidden">
+                    <h3>Winners:</h3>
+                    <div id="winnersList" class="winners-list"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="undoBtn" class="secondary-btn" disabled>Undo Last Draw</button>
+                    <button id="exportBtn" class="secondary-btn">Export to CSV</button>
+                </div>
+
+                <!-- Reset Button (Separated) -->
+                <div class="reset-section">
+                    <button id="resetBtn" class="reset-btn">Reset</button>
+                </div>
+            </section>
+
+            <!-- History Panel -->
+            <section class="history-panel">
+                <h2>Draw History</h2>
+                <div id="historyList" class="history-list">
+                    <p class="no-history">No draws yet</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
